@@ -23,6 +23,16 @@ func getCommands() map[string]cliCommand {
 			description: "Exit the Pokedex",
 			callback:    commandExit,
 		},
+		"map": {
+			name:        "map",
+			description: "Display the map",
+			callback:    commandMap,
+		},
+		"mapb": {
+			name:        "mapb",
+			description: "Display the map backwards",
+			callback:    commandMapBack,
+		},
 	}
 }
 
@@ -35,9 +45,48 @@ func commandExit(config *ReplStateConfig) error {
 func commandHelp(config *ReplStateConfig) error {
 	fmt.Println("Welcome to the Pokedex!")
 	fmt.Println("Usage:")
-	
+
 	for _, cmd := range getCommands() {
 		fmt.Printf("%s: %s\n", cmd.name, cmd.description)
+	}
+	return nil
+}
+
+func commandMap(config *ReplStateConfig) error {
+	fmt.Println("Map:")
+	fmt.Println("")
+
+	locationAreas, err := config.pokeapiClient.ListLocationAreas(config.nextLocationAreaURL)
+	if err != nil {
+		return err
+	}
+
+	config.storeLocationAreaPage(locationAreas)
+
+	for _, result := range locationAreas.Results {
+		fmt.Println(result.Name)
+	}
+	return nil
+}
+
+func commandMapBack(config *ReplStateConfig) error {
+	fmt.Println("Map Back:")
+	fmt.Println("")
+
+	if config.prevLocationAreaURL == "" {
+		fmt.Println("you're on the first page")
+		return nil
+	}
+
+	locationAreas, err := config.pokeapiClient.ListLocationAreas(config.prevLocationAreaURL)
+	if err != nil {
+		return err
+	}
+
+	config.storeLocationAreaPage(locationAreas)
+
+	for _, result := range locationAreas.Results {
+		fmt.Println(result.Name)
 	}
 	return nil
 }
