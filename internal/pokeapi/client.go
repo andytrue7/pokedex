@@ -10,25 +10,36 @@ import (
 	"io"
 	"net/http"
 	"time"
+
+	"github.com/andytrue7/pokedexcli/internal/pokecache"
 )
 
 const baseURL = "https://pokeapi.co/api/v2"
 
 type Client struct {
 	httpClient http.Client
+	cache      *pokecache.Cache
 }
 
-func NewClient(timeout time.Duration) Client {
+func NewClient(timeout, cacheInterval time.Duration) Client {
 	return Client{
 		httpClient: http.Client{
 			Timeout: timeout,
 		},
+		cache: pokecache.NewCache(cacheInterval),
 	}
 }
 
 // get issues a GET request against url and decodes the JSON response body
-// into target, which must be a pointer.
+// into target, which must be a pointer. Responses are cached by url, so a
+// repeated request within the cache's interval is served without hitting
+// the network.
 func (c *Client) get(url string, target any) error {
+	if body, ok := c.cache.Get(url); ok {
+		fmt.Printf("cache hit: %s\n", url)
+		return json.Unmarshal(body, target)
+	}
+
 	res, err := c.httpClient.Get(url)
 	if err != nil {
 		return err
@@ -43,6 +54,8 @@ func (c *Client) get(url string, target any) error {
 	if res.StatusCode > 299 {
 		return fmt.Errorf("response failed with status code: %d and\nbody: %s\n", res.StatusCode, body)
 	}
+
+	c.cache.Add(url, body)
 
 	return json.Unmarshal(body, target)
 }

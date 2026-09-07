@@ -6,10 +6,15 @@ import (
 	"github.com/andytrue7/pokedexcli/internal/pokeapi"
 )
 
+const (
+	httpTimeout   = 5 * time.Second
+	cacheInterval = 5 * time.Minute
+)
+
 func main() {
 	config := &ReplStateConfig{
 		commands:      getCommands(),
-		pokeapiClient: pokeapi.NewClient(5 * time.Second),
+		pokeapiClient: pokeapi.NewClient(httpTimeout, cacheInterval),
 	}
 
 	startRepl(config)
