@@ -8,10 +8,10 @@ import (
 type cliCommand struct {
 	name        string
 	description string
-	callback    func() error
+	callback    func(*ReplStateConfig) error
 }
 
-func commandRegister() map[string]cliCommand {
+func getCommands() map[string]cliCommand {
 	return map[string]cliCommand{
 		"help": {
 			name:        "help",
@@ -26,17 +26,17 @@ func commandRegister() map[string]cliCommand {
 	}
 }
 
-func commandExit() error {
+func commandExit(config *ReplStateConfig) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 	return nil
 }
 
-func commandHelp() error {
+func commandHelp(config *ReplStateConfig) error {
 	fmt.Println("Welcome to the Pokedex!")
 	fmt.Println("Usage:")
 	
-	for _, cmd := range commandRegister() {
+	for _, cmd := range getCommands() {
 		fmt.Printf("%s: %s\n", cmd.name, cmd.description)
 	}
 	return nil
