@@ -8,7 +8,7 @@ import (
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*ReplStateConfig) error
+	callback    func(*ReplStateConfig, []string) error
 }
 
 func getCommands() map[string]cliCommand {
@@ -33,16 +33,21 @@ func getCommands() map[string]cliCommand {
 			description: "Display the map backwards",
 			callback:    commandMapBack,
 		},
+		"explore": {
+			name:        "explore",
+			description: "Explore a location area",
+			callback:    commandExplore,
+		},
 	}
 }
 
-func commandExit(config *ReplStateConfig) error {
+func commandExit(config *ReplStateConfig, args []string) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 	return nil
 }
 
-func commandHelp(config *ReplStateConfig) error {
+func commandHelp(config *ReplStateConfig, args []string) error {
 	fmt.Println("Welcome to the Pokedex!")
 	fmt.Println("Usage:")
 
@@ -52,7 +57,7 @@ func commandHelp(config *ReplStateConfig) error {
 	return nil
 }
 
-func commandMap(config *ReplStateConfig) error {
+func commandMap(config *ReplStateConfig, args []string) error {
 	fmt.Println("Map:")
 	fmt.Println("")
 
@@ -69,7 +74,7 @@ func commandMap(config *ReplStateConfig) error {
 	return nil
 }
 
-func commandMapBack(config *ReplStateConfig) error {
+func commandMapBack(config *ReplStateConfig, args []string) error {
 	fmt.Println("Map Back:")
 	fmt.Println("")
 
@@ -87,6 +92,26 @@ func commandMapBack(config *ReplStateConfig) error {
 
 	for _, result := range locationAreas.Results {
 		fmt.Println(result.Name)
+	}
+	return nil
+}
+
+func commandExplore(config *ReplStateConfig, args []string) error {
+	if len(args) != 1 {
+		return fmt.Errorf("usage: explore <location-area-name>")
+	}
+	areaName := args[0]
+
+	fmt.Printf("Exploring %s...\n", areaName)
+	fmt.Println("Found Pokemon:")
+
+	locationArea, err := config.pokeapiClient.GetLocationArea(areaName)
+	if err != nil {
+		return err
+	}
+
+	for _, encounter := range locationArea.PokemonEncounters {
+		fmt.Printf(" - %s\n", encounter.Pokemon.Name)
 	}
 	return nil
 }
