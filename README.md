@@ -4,13 +4,24 @@ A terminal Pokédex: an interactive REPL, written in Go, that talks to the
 [PokéAPI](https://pokeapi.co) to browse location areas, explore the
 Pokémon found there, and catch and inspect them.
 
-## Requirements
+## Motivation
+
+This is a learning project for practicing Go fundamentals — REPLs,
+structuring an HTTP API client as its own package, JSON decoding, and a
+simple in-process TTL cache — by building something with a real, freely
+available API (PokeAPI) instead of a toy dataset. It grew feature by
+feature (map, explore, catch, inspect, pokedex) the way a real CLI tool
+would.
+
+## Quick Start
+
+Requirements:
 
 - Go 1.26 or later
 - Internet access (all data comes from the public PokeAPI at
   `https://pokeapi.co/api/v2`)
 
-## Running it
+Run it:
 
 ```sh
 go run .
@@ -24,7 +35,9 @@ Pokedex >
 
 Type a command and press enter. Type `exit` to quit.
 
-## Commands
+## Usage
+
+### Commands
 
 | Command | Arguments | Description |
 |---|---|---|
@@ -82,7 +95,7 @@ Pokedex > exit
 Closing the Pokedex... Goodbye!
 ```
 
-## Features
+### Features
 
 - **Paginated location browsing** (`map` / `mapb`) — walks forward and
   backward through PokeAPI's paginated `location-area` list, remembering
@@ -100,7 +113,12 @@ Closing the Pokedex... Goodbye!
   few minutes, so re-fetching a page or Pokémon (e.g. paging back and
   forth, or re-catching the same species) doesn't hit the network again.
 
-## Project layout
+## Contributing
+
+This started as a personal practice project, but issues and PRs are
+welcome.
+
+Project layout, if you're getting oriented:
 
 ```
 main.go                       entry point: builds the config and starts the REPL
@@ -115,8 +133,14 @@ internal/pokeapi/             PokeAPI HTTP client, one file per endpoint
 internal/pokecache/           short-lived TTL cache used by the PokeAPI client
 ```
 
-## Testing
+Adding a new endpoint means adding one file to `internal/pokeapi/` with a
+response struct and a method on `*Client` that calls the shared `get()`
+helper — you get caching for free.
+
+Before opening a PR:
 
 ```sh
-go test ./...
+gofmt -l .        # should print nothing
+go vet ./...
+go test -race ./...
 ```
