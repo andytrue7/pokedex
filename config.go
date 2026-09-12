@@ -7,6 +7,7 @@ type ReplStateConfig struct {
 	pokeapiClient       pokeapi.Client
 	nextLocationAreaURL string
 	prevLocationAreaURL string
+	pokedex             map[string]pokeapi.Pokemon
 }
 
 // storeLocationAreaPage remembers the Next/Previous URLs of a fetched page

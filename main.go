@@ -15,6 +15,7 @@ func main() {
 	config := &ReplStateConfig{
 		commands:      getCommands(),
 		pokeapiClient: pokeapi.NewClient(httpTimeout, cacheInterval),
+		pokedex:       make(map[string]pokeapi.Pokemon),
 	}
 
 	startRepl(config)
